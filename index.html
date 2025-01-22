@@ -1,139 +1,283 @@
 <!DOCTYPE html>
+
 <html lang="ja">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
   <meta name="theme-color" content="#00A651">
+
   <meta name="apple-mobile-web-app-capable" content="yes">
+
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <meta name="apple-mobile-web-app-title" content="価格弾力性">
+
   <title>価格弾力性計算アプリ</title>
+
+  <link rel="manifest" href="manifest.json">
+
+  <link rel="icon" href="app-icon.png">
+
+  <link rel="apple-touch-icon" href="app-icon.png">
+
   <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
+
     * {
+
       -webkit-tap-highlight-color: transparent;
+
     }
+
     body {
+
       font-family: 'BIZ UDPGothic', -apple-system, BlinkMacSystemFont, 'メイリオ', Meiryo, sans-serif;
+
       max-width: 100%;
+
       margin: 0 auto;
+
       padding: 20px;
+
       background-color: #f1f5f8;
+
     }
+
     label, input, button {
+
       display: block;
+
       margin-bottom: 15px;
+
       width: 100%;
+
       box-sizing: border-box;
+
       font-family: 'BIZ UDPGothic', sans-serif;
+
     }
+
     input[type="number"] {
+
       padding: 12px;
+
       font-size: 16px;
+
       border: 1px solid #ced4da;
+
       border-radius: 6px;
+
       appearance: none;
+
       -webkit-appearance: none;
+
       background-color: white;
+
     }
+
     button {
+
       padding: 12px;
+
       font-size: 16px;
+
       background-color: #4b7c9b;
+
       color: white;
+
       border: none;
+
       border-radius: 6px;
+
       cursor: pointer;
+
       touch-action: manipulation;
+
     }
+
     button:active {
+
       background-color: #3a6075;
+
     }
+
     .result-text {
+
       color: #dc3545;
+
       padding: 15px;
+
       background-color: white;
+
       border-radius: 6px;
+
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
     }
+
     h1 {
+
       font-size: 24px;
+
       margin-bottom: 20px;
+
       color: #212529;
+
     }
+
     #calculation {
+
       background-color: white;
+
       padding: 15px;
+
       border-radius: 6px;
+
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
       margin-top: 20px;
+
     }
+
   </style>
+
 </head>
+
 <body>
+
   <h1>価格弾力性計算アプリ</h1>
+
   <label for="beforeQuantity">売価変更前 売上数量:</label>
+
   <input type="number" id="beforeQuantity" required inputmode="numeric" pattern="[0-9]*">
 
+
+
   <label for="afterQuantity">売価変更後 売上数量:</label>
+
   <input type="number" id="afterQuantity" required inputmode="numeric" pattern="[0-9]*">
 
+
+
   <label for="standardPrice">標準売価:</label>
+
   <input type="number" id="standardPrice" required inputmode="numeric" pattern="[0-9]*">
 
+
+
   <label for="priorityPrice">優先売価:</label>
+
   <input type="number" id="priorityPrice" required inputmode="numeric" pattern="[0-9]*">
+
+
 
   <button onclick="calculatePriceElasticity()">価格弾力性を計算</button>
 
+
+
   <p id="result" class="result-text"></p>
 
+
+
   <div id="calculation">
+
     <p><strong>※値が大きいほど、価格の変化に対して需要の感度が高いことを意味します。</strong></p>
+
   </div>
 
+
+
   <script>
+
     function calculatePriceElasticity() {
+
       try {
+
         const beforeQuantity = parseFloat(document.getElementById('beforeQuantity').value);
+
         const afterQuantity = parseFloat(document.getElementById('afterQuantity').value);
+
         const standardPrice = parseFloat(document.getElementById('standardPrice').value);
+
         const priorityPrice = parseFloat(document.getElementById('priorityPrice').value);
 
+
+
         // 入力値のチェック
+
         if (isNaN(beforeQuantity) || isNaN(afterQuantity) || isNaN(standardPrice) || isNaN(priorityPrice)) {
+
           throw new Error('すべての項目に数値を入力してください。');
+
         }
+
+
 
         if (beforeQuantity === 0 || standardPrice === 0) {
+
           throw new Error('売価変更前の売上数量と標準売価は0以外の値を入力してください。');
+
         }
+
+
 
         const quantityChangeRate = (afterQuantity - beforeQuantity) / beforeQuantity;
+
         const priceChangeRate = (priorityPrice - standardPrice) / standardPrice;
 
+
+
         if (priceChangeRate === 0) {
+
           throw new Error('標準売価と優先売価が同じ値です。');
+
         }
+
+
 
         const priceElasticity = Math.abs(quantityChangeRate / priceChangeRate);
 
+
+
         const result = document.getElementById('result');
+
         result.innerHTML = `<strong>価格弾力性: ${priceElasticity.toFixed(2)}</strong><br>`;
 
+
+
         if (priceElasticity > 1) {
+
           result.innerHTML += "<strong>需要は価格弾力的です。</strong><br>価格が下がれば需要が大きく増加し、価格が上がれば需要が大きく減少します。";
+
         } else if (priceElasticity < 1) {
+
           result.innerHTML += "<strong>需要は価格非弾力的です。</strong><br>価格が変化しても需要はあまり変化しません。";
+
         } else {
+
           result.innerHTML += "<strong>需要の価格弾力性は単位弾力的です。</strong>";
+
         }
 
+
+
       } catch (error) {
+
         const result = document.getElementById('result');
+
         result.innerHTML = `<strong style="color: #dc3545;">エラー: ${error.message}</strong>`;
+
       }
+
     }
+
   </script>
+
 </body>
+
 </html>
